@@ -1,0 +1,37 @@
+export function ok(data: unknown) {
+    return {
+        content: [
+            {
+                type: "text" as const,
+                text: JSON.stringify(data, null, 2),
+            },
+        ],
+    };
+}
+
+export function fail(error: unknown) {
+    const message =
+        error instanceof Error
+            ? error.message
+            : typeof error === "string"
+              ? error
+              : JSON.stringify(error);
+
+    return {
+        content: [
+            {
+                type: "text" as const,
+                text: message,
+            },
+        ],
+        isError: true as const,
+    };
+}
+
+export async function runTool<T>(fn: () => Promise<T>) {
+    try {
+        return ok(await fn());
+    } catch (error) {
+        return fail(error);
+    }
+}
